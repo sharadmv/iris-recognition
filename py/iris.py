@@ -9,17 +9,21 @@ import numpy as np
 
 def find_iris(image, pupil, **kwargs):
     buffer = 20
+    # run canny
     image = filter.canny(image, sigma=1, low_threshold=10, high_threshold=50)
     cx, cy, radius = pupil
     def gen_dir(f):
         return map(f, np.arange(0, 2*pi, 0.5))
+    # get ray directions
     directions = zip(gen_dir(cos), gen_dir(sin))
     shape = image.shape
     points = []
     for d in directions:
         start = (cx + (radius + buffer) * d[0], cy + (radius + buffer)*d[1])
+        # send ray out
         while shape[0] > start[0] and start[0] > 0 and shape[1] > start[1] and start[1] > 0:
             pixel = map(int, start)
+            # add nearest > 0 pixel to list
             if (check_neighbourhood(image, pixel)):
                 points.append((pixel[0], pixel[1]))
                 break
@@ -84,5 +88,5 @@ def detect(d, i,**kwargs):
     rgb[x,y] = (220, 40, 40)
     imshow(rgb)
 if __name__ == "__main__":
-    d = Dataset('data')
+    d = Dataset('../data')
     detect(d, 0)
