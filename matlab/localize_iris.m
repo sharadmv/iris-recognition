@@ -1,4 +1,4 @@
-function [eye_information] = localize_iris(filename)
+function iris = localize_iris(filename)
 %LOCALIZE_IRIS find pupil and iris in the given image
 %   ARGUMENTS
 %       filename - location of image file
@@ -56,6 +56,15 @@ iris_radii = fminsearch(@(radii) ellipse_fit([pupil_center(1) pupil_center(2)], 
 draw_ellipse(pupil_center(1),pupil_center(2),iris_radii(1),iris_radii(2),'b');
 eye_information = horzcat(pupil_center,pupil_radius,iris_radii);
 
+%% TRANSFORM CIRCLE
+iris_ellipse = gray((pupil_center(2)-ceil(iris_radii(2))):(pupil_center(2)+ceil(iris_radii(2))),(pupil_center(1)-ceil(iris_radii(1))):(pupil_center(1)+ceil(iris_radii(1))));
+iris_circle = imresize(iris_ellipse, [size(iris_ellipse,1) size(iris_ellipse,1)]);
+
+%% RECTANGULARIZE
+iris_circle = double(iris_circle)/255.0;
+iris_rectangle = ImToPolar(iris_circle,pupil_radius/iris_radii(2),1,40,250);
+iris = iris_rectangle;
+figure,imshow(iris_rectangle);
 end
 
 
@@ -79,6 +88,7 @@ for i=1:360
     ray_dir = [cos(degtorad(i)) sin(degtorad(i))];
     ray_dir = ray_dir/norm(ray_dir);
     ellipse_pts(i,:) = [center(1)+ray_dir(1)*radii(1) center(2)+ray_dir(2)*radii(2)];
+    
     distance = pdist(cat(1,ellipse_pts(i,:),projected_pts(i,:)));
     distances(i,1) = distance;
 end
