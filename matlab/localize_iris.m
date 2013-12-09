@@ -6,7 +6,6 @@ function iris = localize_iris(filename)
 %       eye_information(1:2) - center of pupil
 %       eye_information(3) - radius of pupil
 %       eye_information(4:5) = [a b] - radii of detected iris ellipse
-close all;
 
 %% CHANGE IMAGE HERE FOR TESTING
 
@@ -63,8 +62,25 @@ iris_circle = imresize(iris_ellipse, [size(iris_ellipse,1) size(iris_ellipse,1)]
 %% RECTANGULARIZE
 iris_circle = double(iris_circle)/255.0;
 iris_rectangle = ImToPolar(iris_circle,pupil_radius/iris_radii(2),1,40,250);
-iris = iris_rectangle;
-figure,imshow(iris_rectangle);
+iris = iris_rectangle(5:35,:);
+% iris = iris_rectangle;
+figure,imshow(iris);
+
+% %% Filter noise
+% iris_line = iris(17,:);
+% iris_shade = median(iris_line);
+% iris_shade
+% % dark_areas = ~im2bw(iris_rectangle, iris_shade-0.2*iris_shade);
+% % light_areas = im2bw(iris_rectangle, iris_shade+0.2*(1-iris_shade));
+% % figure,imshow(light_areas);
+% % figure,imshow(dark_areas);
+% 
+% filtered_rectangle = xor(im2bw(iris, iris_shade-0.1),im2bw(iris, iris_shade+0.1));
+% figure,imshow(edge(filtered_rectangle));
+% 
+% % figure,imshow(filtered_rectangle);
+% % filtered_rectangle = ~bwareaopen(~bwareaopen(filtered_rectangle,400),400);
+% % figure,imshow(filtered_rectangle);
 end
 
 
@@ -88,9 +104,13 @@ for i=1:360
     ray_dir = [cos(degtorad(i)) sin(degtorad(i))];
     ray_dir = ray_dir/norm(ray_dir);
     ellipse_pts(i,:) = [center(1)+ray_dir(1)*radii(1) center(2)+ray_dir(2)*radii(2)];
-    
-    distance = pdist(cat(1,ellipse_pts(i,:),projected_pts(i,:)));
-    distances(i,1) = distance;
+    ray_distance = pdist(cat(1,center,projected_pts(i,:)));
+    if ray_distance > 40.0 && ray_distance < 70.0
+        distance = pdist(cat(1,ellipse_pts(i,:),projected_pts(i,:)));
+        distances = cat(1,distances,distance.^2);
+    end
 end
+% distances = sort(distances);
+% value = sum(distances(23:67));
 value = sum(distances);
 end
