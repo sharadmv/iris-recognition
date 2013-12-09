@@ -18,9 +18,11 @@ I = imread(filename);
 
 %% FIND PUPIL
 gray = rgb2gray(I);
-BW1 = ~im2bw(gray, 0.1);
+BW1 = ~im2bw(gray, 0.15);
+% figure,imshow(BW1);
 BW2 = ~bwareaopen(~bwareaopen(BW1,400),400);
-[centers,radii,metric] = imfindcircles(BW2,[10 30]);
+% figure,imshow(BW2);
+[centers,radii,metric] = imfindcircles(BW2,[10 40]);
 pupil_radius = radii(1,1);
 pupil_center = [centers(1,1) centers(1,2)];
 
@@ -28,7 +30,7 @@ pupil_center = [centers(1,1) centers(1,2)];
 % Find edges
 BW3 = edge(gray,'canny',.1,2);
 BW4 = bwareaopen(BW3,10);
-figure,imshow(gray);
+% figure,imshow(gray);
 
 % Shoot rays at every degree outwards from pupil and stuff
 ray_buffer = pupil_radius+10;
@@ -64,23 +66,17 @@ iris_circle = double(iris_circle)/255.0;
 iris_rectangle = ImToPolar(iris_circle,pupil_radius/iris_radii(2),1,40,250);
 iris = iris_rectangle(5:35,:);
 % iris = iris_rectangle;
-figure,imshow(iris);
 
-% %% Filter noise
+% figure,imshow(iris);
+
+%% Filter noise
 % iris_line = iris(17,:);
 % iris_shade = median(iris_line);
-% iris_shade
-% % dark_areas = ~im2bw(iris_rectangle, iris_shade-0.2*iris_shade);
-% % light_areas = im2bw(iris_rectangle, iris_shade+0.2*(1-iris_shade));
-% % figure,imshow(light_areas);
-% % figure,imshow(dark_areas);
-% 
-% filtered_rectangle = xor(im2bw(iris, iris_shade-0.1),im2bw(iris, iris_shade+0.1));
-% figure,imshow(edge(filtered_rectangle));
-% 
-% % figure,imshow(filtered_rectangle);
-% % filtered_rectangle = ~bwareaopen(~bwareaopen(filtered_rectangle,400),400);
-% % figure,imshow(filtered_rectangle);
+% filtered_rectangle = xor(im2bw(iris, iris_shade-0.25*iris_shade),im2bw(iris, iris_shade+0.25*(1-iris_shade)));
+% filtered_rectangle = ~bwareaopen(~filtered_rectangle, 100);
+% figure,imshow(filtered_rectangle);
+% iris = min(iris, filtered_rectangle);
+% figure,imshow(iris)
 end
 
 
