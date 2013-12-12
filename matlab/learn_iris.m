@@ -3,8 +3,8 @@
 %function [threshhold, false_positives, false_negatives, distances] = ...
 %        learn_iris(iris_path)
 
-%cd(iris_path);
-cd('/home/r/Documents/berkeley/cs280/iris-recognition/processed/MMU');
+iris_path = '/home/r/Documents/berkeley/cs280/iris-recognition/processed/MMU';
+cd(iris_path);
 
 % For each eye, use first four images for training, and last image for test.
 
@@ -15,8 +15,8 @@ n_subjects = 46;
 n_images = 4;
 n = n_subjects * n_images;
 
-distances = zeros(n, n);
-for i = 1:n
+distances = ones(n, n)*inf;
+for i = 1:n-1
     subject_i = floor((i-1)/n_images) + 1;
     if mod(i,n_images) == 0
         image_i = n_images;
@@ -31,7 +31,7 @@ for i = 1:n
     i_iris = imread(sprintf('%d/left/%d.bmp',subject_i,image_i));
     i_code = generate_code(i_iris);
 
-    for j = i:n
+    for j = i+1:n
         subject_j = floor((j-1)/n_images) + 1;
         if mod(j,n_images) == 0
             image_j = n_images;
@@ -53,16 +53,16 @@ for i = 1:n
                   (subject_j-1)*n_images+image_j) = dist;
     end
 end
-save('distances.mat', 'distances');
+save('distances', 'distances');
 
 
 % For theta = min_valid_dist : max_valid_dist
 %   Calculate cost = match(i,i) + match(i,j), with
 %       match(i,j) = { d_{ij} <= theta, 1
 %                     else,            -1
-% Pick theta with minimum cost
+% Pick theta with max cost
 threshhold = 0;
-min_cost = inf;
+max_cost = -inf;
 for theta = foo:bar % TODO
     cost = -1;
 
@@ -74,9 +74,10 @@ for theta = foo:bar % TODO
         for j = i:n
             cost = cost + theta_cost(distances(i,j), theta);
         end
-    if cost < min_cost
+    if cost > max_cost
         threshhold = theta;
-        min_cost = cost;
+        max_cost = cost;
+    end
 end
 
 
