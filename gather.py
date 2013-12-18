@@ -9,12 +9,13 @@ def gather(folder, name):
     temp = None
     left = [(folder+"/right/"+x) for x in os.listdir(folder+"/right/") if re.match('[0-9].bmp', x)]
     right = [(folder+"/left/"+x) for x in os.listdir(folder+"/left/") if re.match('[0-9].bmp', x)]
+    print os.listdir(folder+"/left")
     for image in left:
         print image
         mat['left']['x'].append(imread(image, flatten=True))
         mat['left']['y'].append(int(image.split('/')[1]))
     for image in right:
-        print image
+        print image, int(image.split('/')[1])
         mat['right']['x'].append(imread(image, flatten=True))
         mat['right']['y'].append(int(image.split('/')[1]))
     return temp
